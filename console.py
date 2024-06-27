@@ -10,6 +10,8 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import re
+import shlex
 
 
 class HBNBCommand(cmd.Cmd):
@@ -73,7 +75,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -113,19 +115,133 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
+    """
+    mahmoud :
+     - add function that handel the value -> value_handler(str)
+     - function that handel the string value -> string_handeler(statment)
+     - update the create function to fetch new argumant
+    """
+    def value_handler(self, argumant):
+        """
+        this method handel  the value to create
+        method from string or int or float ...etc
+        """
+        argumant = argumant.split()
+        result = dict()
+        for arg in argumant:
+            keyvalue = arg.split('=')
+            # check if the we have key and value
+            if len(keyvalue) != 2:
+                continue  # in this case should skip the argumant
+            if keyvalue[1][0] == '"':  # check if value is string or not
+                value = self.string_handeler(keyvalue[1])
+                if value is None:  # in case the not valid
+                    continue
+                else:  # valid string
+                    result[keyvalue[0]] = value
+
+            elif '.' in keyvalue[1]:  # check if it's a float number
+                try:
+                    value = float(keyvalue[1])
+                    result[keyvalue[0]] = value
+
+                except ValueError:
+                    """ in case its not a float number or value not valid """
+                    continue
+            elif keyvalue[1].isdigit():  # check if it's integer
+                result[keyvalue[0]] = int(keyvalue[1])
+            else:
+                continue
+        return result
+
+    def string_handeler(self, statment):
+        """
+        loop of the value to remove " from start and handel /,_
+        and handel space
+        """
+        if len(statment) == 2:
+            return ''
+
+        value = ''
+        valid = True
+
+        for i in range(1, len(statment) - 1):
+            if (statment[i] == '_'):   # handel <'_'>
+                value += ' '
+            # handel <'"'>
+            elif (statment[i] == '\\' and i < len(statment) - 1):
+                if (statment[i + 1] == '"'):
+                    value += '"'
+                else:
+                    continue
+            elif (statment[i] == '"'):
+                if (statment[i - 1] == '\\'):
+                    continue
+                else:
+                    valid = False
+                    break
+
+            elif (statment[i] == ' '):
+                valid = False
+                break
+
+            else:
+                value += statment[i]
+
+        if valid:
+            return value
+        else:
+            return 
+
+    def _keyvalue(self, args):
+        """Creates a dictionary from a list of key-value pair strings."""
+        new_dict = {}
+
+        for arg in args:
+            # Check if the string contains an '=' to separate key and value
+            if "=" in arg:
+                # Split the string into key and value at the first '='
+                key, value = arg.split('=', 1)
+
+                # If the value is quoted, remove quotes and replace underscores with spaces
+                if value[0] == value[-1] == '"':
+                    value = shlex.split(value)[0].replace('_', ' ')
+                else:
+                # Try to convert the value to an integer
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        # If that fails, try to convert the value to a float
+                        try:
+                            value = float(value)
+                        except ValueError:
+                            # If both conversions fail, skip this key-value pair
+                            continue
+
+                # Add the key-value pair to the dictionary
+                new_dict[key] = value
+    
+        return new_dict
+
+
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
+        arg = args.split()
+        if len(arg) == 0:
             print("** class name missing **")
-            return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+            return False
 
+        if args[0] in self.classes:
+            pramiters = self._keyvalue(args[1:])
+            instance = self.classes[args[0]](**pramiters)
+        else:
+            print("** class doesn't exist **")
+            return False
+        
+        print(instance.id)
+        instance.save()
+
+    
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
@@ -187,7 +303,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -272,7 +388,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -280,10 +396,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
@@ -319,6 +435,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
