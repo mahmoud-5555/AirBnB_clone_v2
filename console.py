@@ -226,14 +226,23 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        arg = args.split()
-        if len(arg) == 0:
+        arg = args.split(' ')
+    
+        if not args:
             print("** class name missing **")
             return False
 
-        if args[0] in self.classes:
-            pramiters = self._keyvalue(args[1:])
-            instance = self.classes[args[0]](**pramiters)
+        class_name = arg[0].strip()  # Strip any surrounding whitespace
+        
+        if len(arg) == 0:
+            
+            print("** class name missing **")
+            return False
+
+        if class_name in self.classes.keys():
+            pramiters = self._keyvalue(arg[1:])
+            print(pramiters)
+            instance = self.classes[class_name](**pramiters)
         else:
             print("** class doesn't exist **")
             return False

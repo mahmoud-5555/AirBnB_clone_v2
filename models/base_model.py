@@ -12,7 +12,7 @@ from sqlalchemy.orm import declarative_base
 if storage_type == 'db':
     Base = declarative_base()
 else:
-    Base = object()
+    Base = object
 
 class BaseModel(Base):
     """A base class for all hbnb models"""
@@ -21,18 +21,33 @@ class BaseModel(Base):
         id = Column(String(60), primary_key=True,nullable=False)
         created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
         updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    else:
+        def __init__(self, *args, **kwargs):
+            """Instatntiates a new model"""
+            if not kwargs:
+                # from models import storage
+                self.id = str(uuid.uuid4())
+                self.created_at = datetime.utcnow()
+                self.updated_at = self.created_at
+            else:
+                if ('id'  not in kwargs.keys()):
+                    self.id = str(uuid.uuid4())
 
-    def __init__(self, *args, **kwargs):
-        """Instatntiates a new model"""
-        if not kwargs:
-            # from models import storage
-            self.id = str(uuid.uuid4())
-        else:
-            kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
+                if ('created_at' in kwargs.keys()):
+                    kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
                                                      '%Y-%m-%dT%H:%M:%S.%f')
-            kwargs['created_at'] = datetime.strptime(kwargs['created_at'],
+                else:
+                    self.created_at = datetime.utcnow()
+
+                if ('updated_at' in kwargs.keys()):
+                    kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'],
                                                      '%Y-%m-%dT%H:%M:%S.%f')
-            del kwargs['__class__']
+                else:
+                    self.updated_at = self.created_at
+
+            if '__class__' in kwargs:
+                del kwargs['__class__']
+
             self.__dict__.update(kwargs)
 
     def __str__(self):
