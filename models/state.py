@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
-from models.base_model import BaseModel
+from models.base_model import BaseModel,Base
 from sqlalchemy import Column, Integer, String, create_engine, ForeignKey
 from sqlalchemy import CHAR, DateTime,func
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,9 +9,7 @@ from models import storage_type
 from models import storage
 #from models.city import City
 
-
-
-class State(BaseModel):
+class State(BaseModel, Base):
     """ State class """
     if storage_type == 'db':
         __tablename__ = 'states'

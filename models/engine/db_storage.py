@@ -15,40 +15,58 @@ from models.place import Place
 from models.city import City
 from models.review import Review
 from models.base_model import Base
+from models.base_model import BaseModel
 import os
 
 class DBStorage:
-    """Database storage engine"""
-
+    __engine = None
+    __session = None
+     
     def __init__(self):
-        """Initialize the database connection and session"""
-        mysql_user = os.getenv('HBNB_MYSQL_USER', 'root')
-        mysql_pwd = os.getenv('HBNB_MYSQL_PWD', '')
-        mysql_host = os.getenv('HBNB_MYSQL_HOST', 'localhost')
-        mysql_db = os.getenv('HBNB_MYSQL_DB', '')
+        """ """
+        mysql_user = os.getenv('HBNB_MYSQL_USER')
+        mysql_pwd = os.getenv('HBNB_MYSQL_PWD')
+        mysql_host = os.getenv('HBNB_MYSQL_HOST', default='localhost')
+        mysql_db = os.getenv('HBNB_MYSQL_DB')
 
-        if not all([mysql_user, mysql_pwd, mysql_host, mysql_db]):
-            raise ValueError("Missing one or more required environment variables")
-
+        # Construct the database URL
+        # should change it after tested
         db_url = f"mysql+mysqldb://{mysql_user}:{mysql_pwd}@{mysql_host}/{mysql_db}"
 
+        # Create the engine
         self.__engine = create_engine(db_url, pool_pre_ping=True)
-        self.__session = None
+
+        # Create a sessionmaker
+        Session = sessionmaker(bind=self.__engine)
+
+        # Create a session
+        self.__session = Session()
 
         if os.getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
-        """Query and return all objects of a given class or all classes"""
+        """
+        this method must return a dictionary
+        key = <class-name>.<object-id>
+        value = object
+        """
+        classes = {
+               'BaseModel': BaseModel, 'User': User, 'Place': Place,
+               'State': State, 'City': City, 'Amenity': Amenity,
+               'Review': Review
+              }
         data = {}
-        if self.__session.is_active:
+        if self.__session.is_active: #check if the session is open
             try:
-                if cls:
-                    objects = self.__session.query(cls).all()
+                if cls:  #check  if class was passed to method
+                    
+                    objects = self.__session.query(classes[cls]).all()
                     for obj in objects:
                         key = "{}.{}".format(obj.__class__.__name__, obj.id)
                         data[key] = obj
                 else:
+                    # Retrieve all objects from all classes
                     objects = self.__session.query(State).all() + \
                         self.__session.query(City).all() + \
                         self.__session.query(User).all() + \
@@ -58,40 +76,60 @@ class DBStorage:
                     for obj in objects:
                         key = "{}.{}".format(obj.__class__.__name__, obj.id)
                         data[key] = obj
-            except (NoSuchTableError, OperationalError, ProgrammingError) as e:
-                print(f"Error querying database: {e}")
+
+            except NoSuchTableError as no_table:  #incase we wanna test where the error
+                pass
+            except OperationalError as OP_Error:
+                pass
+            except ProgrammingError as API_Error:
+                pass
         return data
 
     def new(self, obj):
-        """Add the object to the current database session"""
-        if obj is not None and self.__session.is_active:
-            try:
-                self.__session.add(obj)
-            except (NoSuchTableError, OperationalError, ProgrammingError) as e:
-                print(f"Error adding object to session: {e}")
-
+        """ add the object to the current database session """
+        if obj is not None:
+            if self.__session.is_active:  #check if the session is open
+                try:
+                    self.__session.add(obj)
+                except NoSuchTableError as no_table:  #incase we wanna test where the error
+                    pass
+                except OperationalError as OP_Error:
+                    pass
+                except ProgrammingError as API_Error:
+                    pass
+                    
     def save(self):
-        """Commit all changes of the current database session"""
-        try:
-            self.__session.commit()
-        except OperationalError as e:
-            print(f"Error committing session: {e}")
-
+        """ commit all changes of the current database session """
+        self.__session.commit()
+    
     def delete(self, obj=None):
-        """Delete the object from the current database session if not None"""
-        if obj is not None and self.__session.is_active:
-            try:
-                self.__session.delete(obj)
-            except (NoSuchTableError, OperationalError, ProgrammingError) as e:
-                print(f"Error deleting object from session: {e}")
-
+        """"delete from the current database session obj if not None"""
+        if obj is not None:
+            if self.__session.is_active:  #check if the session is open
+                try:
+                    self.__session.delete(obj)
+                except NoSuchTableError as no_table:  #incase we wanna test where the error
+                    pass
+                except OperationalError as OP_Error:
+                    pass
+                except ProgrammingError as API_Error:
+                    pass
+    
     def reload(self):
-        """Create all tables in the database and create a new session"""
+        """
+        Create all tables in the database and create a new session.
+        """
+        # Create all tables in the database
         Base.metadata.create_all(self.__engine)
+
+        # Create a sessionmaker with scoped_session
         session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         self.__session = scoped_session(session_factory)
 
         try:
+            # Attempt to commit any pending transactions
             self.__session.commit()
-        except OperationalError as e:
-            print(f"Error committing session: {e}")
+        except OperationalError:
+            # Handle operational errors if any
+            pass
+    

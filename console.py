@@ -2,6 +2,8 @@
 """ Console Module """
 import cmd
 import sys
+import re
+import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -10,8 +12,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-import re
-import shlex
+from models import storage_type
 
 
 class HBNBCommand(cmd.Cmd):
@@ -223,33 +224,23 @@ class HBNBCommand(cmd.Cmd):
     
         return new_dict
 
-
     def do_create(self, args):
         """ Create an object of any class"""
-        arg = args.split(' ')
+        arg = args.split()
     
-        if not args:
-            print("** class name missing **")
-            return False
-
-        class_name = arg[0].strip()  # Strip any surrounding whitespace
-        
         if len(arg) == 0:
-            
             print("** class name missing **")
             return False
 
-        if class_name in self.classes.keys():
+        if arg[0] in self.classes.keys():
             pramiters = self._keyvalue(arg[1:])
-            print(pramiters)
-            instance = self.classes[class_name](**pramiters)
+            instance = self.classes[arg[0]](**pramiters)
+            instance.save()
+            print(instance.id)
+
         else:
             print("** class doesn't exist **")
             return False
-        
-        print(instance.id)
-        instance.save()
-
     
     def help_create(self):
         """ Help information for the create method """
@@ -327,16 +318,18 @@ class HBNBCommand(cmd.Cmd):
         print_list = []
 
         if args:
-            args = args.split(' ')[0]  # remove possible trailing args
+            args = args.split(' ')[0]  # Remove possible trailing args
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
+            data = storage.all(args)
+            for k in data:
+                myinctance = data[k]
+                print_list.append(myinctance)
+    
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
+            for k in data:
+                print_list.append(data[k])
 
         print(print_list)
 
@@ -447,4 +440,13 @@ class HBNBCommand(cmd.Cmd):
 
 
 if __name__ == "__main__":
+    from models.base_model import BaseModel
+    from models.__init__ import storage
+    from models.user import User
+    from models.place import Place
+    from models.state import State
+    from models.city import City
+    from models.amenity import Amenity
+    from models.review import Review
+    
     HBNBCommand().cmdloop()
