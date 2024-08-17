@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+'''flask simple response'''
 from flask import Flask
 
 app =  Flask(__name__)
