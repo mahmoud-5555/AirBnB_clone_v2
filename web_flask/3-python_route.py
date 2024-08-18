@@ -26,7 +26,6 @@ def C(text, strict_slashes=False):
         return 'C ' + new
 
 
-
 @app.route('/python/<text>')
 def pytho(text, strict_slashes=False):
     ''' function that act as api response '''
