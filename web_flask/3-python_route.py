@@ -32,6 +32,8 @@ def pytho(text, strict_slashes=False):
     if text is not None:
         new = text.replace('_', ' ')
         return 'Python ' + new
+    else:
+        return 'Python is cool'
 
 
 if __name__ == "__main__":
