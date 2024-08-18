@@ -25,11 +25,11 @@ def C(text, strict_slashes=False):
         new = text.replace('_', ' ')
         return 'C ' + new
 
-
+@app.route('/python/', defaults={'text': None}, strict_slashes=False)
 @app.route('/python/<text>')
 def pytho(text, strict_slashes=False):
     ''' function that act as api response '''
-    if text is not '':
+    if text :
         new = text.replace('_', ' ')
         return 'Python ' + new
     else:
