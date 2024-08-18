@@ -22,7 +22,9 @@ def HBNB(strict_slashes=False):
 def C(text, strict_slashes=False):
     ''' function that act as api response '''
     if text is not None:
-        return 'C ' + text
+        new = text.replace('_', ' ')
+        return 'C ' + new
+
 
 
 @app.route('/python/<text>')
@@ -30,7 +32,7 @@ def pytho(text, strict_slashes=False):
     ''' function that act as api response '''
     if text is not None:
         new = text.replace('_', ' ')
-        return 'C ' + new
+        return 'Python ' + new
 
 
 if __name__ == "__main__":
