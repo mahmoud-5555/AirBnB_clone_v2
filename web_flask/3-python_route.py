@@ -6,20 +6,20 @@ from flask import Flask
 app = Flask(__name__)
 
 
-@app.route('/')
-def Hello_HBNB(strict_slashes=False):
+@app.route('/', strict_slashes=False)
+def Hello_HBNB():
     ''' function that act as api response '''
     return 'Hello HBNB!'
 
 
-@app.route('/hbnb')
-def HBNB(strict_slashes=False):
+@app.route('/hbnb', strict_slashes=False)
+def HBNB():
     ''' function that act as api response '''
     return 'HBNB'
 
 
-@app.route('/c/<text>')
-def C(text, strict_slashes=False):
+@app.route('/c/<text>', strict_slashes=False)
+def C(text):
     ''' function that act as api response '''
     if text is not None:
         new = text.replace('_', ' ')
