@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 '''flask simple response'''
-from flask import Flask
+from flask import Flask, abort
 
 
 app = Flask(__name__)
@@ -37,11 +37,13 @@ def pytho(text, strict_slashes=False):
         return 'Python is cool'
 
 
-@app.route('/number/<n>',strict_slashes=False)
+@app.route('/number/<n>', strict_slashes=False)
 def numberIsintger(n):
-	if str.isdigit(n):
-		return n + " is a number"
+    n = str(n)
+    if n.isdigit():
+        return n + " is a number"
+    abort(404)
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port='5000')
+    app.run(host='0.0.0.0', port='5000',debug=True)
