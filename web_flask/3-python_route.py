@@ -17,7 +17,7 @@ def HBNB(strict_slashes=False):
     ''' function that act as api response '''
     return 'HBNB'
 
-@app.route('/c/', defaults={'text': None}, strict_slashes=False)
+
 @app.route('/c/<text>')
 def C(text, strict_slashes=False):
     ''' function that act as api response '''
