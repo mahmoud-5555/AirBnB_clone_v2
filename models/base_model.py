@@ -12,7 +12,7 @@ from sqlalchemy.orm import declarative_base
 if storage_type == 'db':
     Base = declarative_base()
 else:
-    Base = object()
+    Base = object
 
 class BaseModel:
     """A base class for all hbnb models"""

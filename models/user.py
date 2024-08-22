@@ -26,4 +26,5 @@ class User(BaseModel, Base):
 
         def __init__(self, *args, **kwargs):
             """constructor  City"""
+            
             super().__init__(*args, **kwargs)
