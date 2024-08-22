@@ -71,3 +71,6 @@ class FileStorage:
         k = obj.to_dict()['__class__'] + '.' + obj.id
         if k in self.__objects.keys():
             del  self.__objects[k]
+
+    def close(self):
+        self.reload()
