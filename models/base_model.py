@@ -24,18 +24,26 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Instatntiates a new model"""
-        if not kwargs:
+        
+        if not kwargs :
             # from models import storage
-            self.id = uuid.uuid4()
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = self.created_at
         else:
+            if 'id' not in kwargs:
+                self.id = str(uuid.uuid4())
+            if 'created_at' not in kwargs:
+                self.created_at = datetime.utcnow()
+            else:
+                kwargs['created_at'] = datetime.strptime(kwargs['created_at'], "%Y-%m-%dT%H:%M:%S.%f")
 
-            if 'updated_at' in kwargs:
-                kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'], '%Y-%m-%dT%H:%M:%S.%f')
+            if 'updated_at' not in kwargs:
+                self.updated_at = self.created_at
+            else:
+                kwargs['updated_at'] = datetime.strptime(kwargs['updated_at'], "%Y-%m-%dT%H:%M:%S.%f")
 
             # Convert 'created_at' if it exists
-            if 'created_at' in kwargs:
-                kwargs['created_at'] = datetime.strptime(kwargs['created_at'], '%Y-%m-%dT%H:%M:%S.%f')
-
             if '__class__' in kwargs:
                 del kwargs['__class__']
 
@@ -66,7 +74,6 @@ class BaseModel:
         dictionary.update(self.__dict__)
         dictionary.update({'__class__':
                           (str(type(self)).split('.')[-1]).split('\'')[0]})
-        print ('_sa_instance_state is exit: ', '_sa_instance_state' in dictionary)
         if  '_sa_instance_state' in dictionary:
             del dictionary['_sa_instance_state']
         dictionary['created_at'] = self.created_at.isoformat()
