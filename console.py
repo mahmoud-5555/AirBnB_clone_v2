@@ -322,7 +322,7 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            data = storage.all(args)
+            data = storage.all(self.classes[args])
             for k in data:
                 myinctance = data[k]
                 print_list.append(myinctance)

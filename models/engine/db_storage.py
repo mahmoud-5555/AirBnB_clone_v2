@@ -51,17 +51,13 @@ class DBStorage:
         key = <class-name>.<object-id>
         value = object
         """
-        classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+        
         data = {}
         if self.__session.is_active: #check if the session is open
             try:
                 if cls:  #check  if class was passed to method
                     
-                    objects = self.__session.query(classes[cls]).all()
+                    objects = self.__session.query(cls).all()
                     for obj in objects:
                         key = "{}.{}".format(obj.__class__.__name__, obj.id)
                         data[key] = obj
