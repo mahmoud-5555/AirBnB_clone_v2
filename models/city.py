@@ -13,11 +13,9 @@ class City(BaseModel, Base):
     """ The city class, contains state ID and name """
     if storage_type == 'db':
         __tablename__ = 'cities'
-        __table_args__ = {'extend_existing': True}
-        state_id = Column(String(128),ForeignKey(State.id), nullable=False)
+        state_id = Column(String(60),ForeignKey(State.id), nullable=False)
         name = Column(String(128), nullable=False)
-        places = relationship("Place", backref="city",\
-                          cascade="all, delete, delete-orphan")
+        places = relationship("Place", backref="cities")
     else:
         state_id = ""
         name = ""

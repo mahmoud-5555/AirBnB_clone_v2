@@ -328,6 +328,7 @@ class HBNBCommand(cmd.Cmd):
                 print_list.append(myinctance)
     
         else:
+            data = storage.all()
             for k in data:
                 print_list.append(data[k])
 
