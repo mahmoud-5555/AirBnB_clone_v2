@@ -14,12 +14,13 @@ def teardown_appcontext(exception=None):
     """Cleanup tasks after each request."""
     storage.close()
 
+
 @app.route('/states_list', strict_slashes=False)
 def allStatesView():
     from models.state import State
     ''''method to response all states request'''
     data = storage.all(State)
-    data = sorted(data.values(),key=lambda a: a.name)
+    data = sorted(data.values(), key=lambda a: a.name)
     return render_template('7-states_list.html', respo=data)
 
 
