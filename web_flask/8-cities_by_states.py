@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 
 @app.teardown_appcontext
-def teardown_Database(exception=None):
+def reconect_DP(exception=None):
     """Cleanup tasks after each request."""
     storage.close()
 
@@ -21,7 +21,7 @@ def allStatesView():
     ''''method to response all states request'''
     data = storage.all(State)
     data = sorted(data.values(), key=lambda a: a.name)
-    return render_template('7-states_list.html', respo=data)
+    return render_template('', respo=data)
 
 
 if __name__ == "__main__":
