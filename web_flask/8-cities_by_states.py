@@ -21,29 +21,30 @@ def allStatesView():
     from models.city import City
     ''''method to response all states request'''
     data_states = (storage.all(State)).values()
-    data_cities =  (storage.all(City)).values()
-    data_results = [] 
+    data_cities = (storage.all(City)).values()
+    data_results = []
     """
     data_results:
-    type : list of dict "states" | key(tuple("id of the state"
-    , "name of the staes")) | value("list of tuple(city's id, city's name)")
+    type : list of dict "states" |
+    key(tuple("id of the state", "name of the staes")) |
+    value("list of tuple(city's id, city's name)")
     """
     # group the data
     for i in data_states:
-        element = dict() # var to make an states  
+        element = dict()  # var to make an states
         key = (i.id, i.name)
-        element[key] = []  #State element
+        element[key] = []  # State element
         for j in data_cities:
             if i.id == j.state_id:
-				# add new value to the states | City : tuple(id , name)
+                # add new value to the states | City : tuple(id , name)
                 element[key].append((j.id, j.name))
-        # After done of the element sort the cities in side the states 
-        element[key] = sorted(element[key], key= lambda a: a[1])
+        # After done of the element sort the cities in side the states
+        element[key] = sorted(element[key], key=lambda a: a[1])
         data_results.append(element)
-    # Sort the States  
+    # Sort the States
     data_results = sorted(data_results, key=lambda a: next(iter(a))[1])
-    
     return render_template('8-cities_by_states.html', respo=data_results)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port='5000')
