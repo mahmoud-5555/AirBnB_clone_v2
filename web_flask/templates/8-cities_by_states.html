@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <HEAD>
-	<meta charset="UTF-8">
 	<TITLE>HBNB</TITLE>
 </HEAD>
 <BODY>
 	<H1>States</H1>
 	<UL>
 		{% for element in respo %}
+		{% for key, value in element.items() %}
 		<LI>
-			{{ element.key()[0][0] }}: <B>{{ element.key()[0][0] }}</B>
+			{{ key[0] }}: <B>{{ key[1] }}</B>
 			<UL>
-				{% for city in element[0] %}
+				{% for city in value %}
 				<LI>{{ city[0] }}: <B>{{ city[1] }}</B></LI>
+				{% endfor %}
 				{% endfor %}
 			</UL>
 		</LI>
